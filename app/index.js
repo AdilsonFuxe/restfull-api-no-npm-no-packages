@@ -4,13 +4,17 @@
 
 // Dependencies
 const http = require('http');
-
 const StringDecoder = require('string_decoder').StringDecoder;
+
+const PORT = 3000;
+const SERVER_URL = 'http://localhost:3000';
 
 // The server should respond to all request with a string
 const server = http.createServer(function (req, res) {
+  const myURL = new URL(`${SERVER_URL}:${PORT}${req.url}`);
+
   // Get the path
-  const path = req.url.replace(/^\/+|\/+$/g, '');
+  const path = myURL.pathname;
 
   // Get the HTTP Method
   const method = req.method.toLowerCase();
@@ -36,7 +40,7 @@ const server = http.createServer(function (req, res) {
 
     const data = {
       path: path,
-      queryStringObject: {},
+      query: myURL.searchParams,
       method: method,
       headers: headers,
       payload: buffer,
@@ -74,8 +78,8 @@ const server = http.createServer(function (req, res) {
 });
 
 // Start the server, and have it listen on port 3000
-server.listen(3000, function () {
-  console.log('The server is listeing on port 3000 now');
+server.listen(PORT, function () {
+  console.log(`The server is listeing on port ${PORT} now`);
 });
 
 // Define the handles
