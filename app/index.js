@@ -4,15 +4,49 @@
 
 // Dependencies
 const http = require('http');
+const https = require('https');
 const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./config');
+const fs = require('fs');
 
-const PORT = config.port;
-const SERVER_URL = 'http://localhost';
+const HTTP_PORT = config.httpPort;
+const HTTPS_PORT = config.httpsPort;
+const SERVER_HTTP_URL = 'http://localhost';
+const SERVER_HTTPS_URL = 'https://localhost';
 
-// The server should respond to all request with a string
-const server = http.createServer(function (req, res) {
-  const myURL = new URL(`${SERVER_URL}:${PORT}${req.url}`);
+// Instantiate the http server
+const httpServer = http.createServer(function (req, res) {
+  unifiedServer(req, res, SERVER_HTTP_URL, HTTP_PORT);
+});
+
+// Instantiate the https server
+const httpsServerOptions = {
+  key: fs.readFileSync('./https/key.pem'),
+  cert: fs.readFileSync('./https/cert.pem'),
+};
+const httpsServer = https.createServer(httpsServerOptions, function (req, res) {
+  unifiedServer(req, res, SERVER_HTTPS_URL, HTTPS_PORT);
+});
+
+// Start the http server
+httpServer.listen(HTTP_PORT, function () {
+  console.log(
+    `The server is listeing on port ${HTTP_PORT} now in ${config.envName} mode`
+  );
+});
+
+// Start the https server
+
+httpsServer.listen(HTTPS_PORT, function () {
+  console.log(
+    `The server is listeing on port ${HTTPS_PORT} now in ${config.envName} mode`
+  );
+});
+
+// All the server logic fot both the http and https server
+
+const unifiedServer = function (req, res, server_url, server_port) {
+  const myURL = new URL(`${server_url}:${server_port}${req.url}`);
 
   // Get the path
   const path = myURL.pathname;
@@ -76,14 +110,7 @@ const server = http.createServer(function (req, res) {
   // console.log('HTTP Request Method: ', method);
   // // Log the Headers
   // console.log('Request Headers: ', headers);
-});
-
-// Start the server, and have it listen on port 3000
-server.listen(PORT, function () {
-  console.log(
-    `The server is listeing on port ${PORT} now in ${config.envName} mode`
-  );
-});
+};
 
 // Define the handles
 const handlers = {};
