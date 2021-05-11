@@ -47,9 +47,8 @@ httpsServer.listen(HTTPS_PORT, function () {
 
 const unifiedServer = function (req, res, server_url, server_port) {
   const myURL = new URL(`${server_url}:${server_port}${req.url}`);
-
   // Get the path
-  const path = myURL.pathname;
+  const path = myURL.pathname.replace(/^\/+|\/$/g, '');
 
   // Get the HTTP Method
   const method = req.method.toLowerCase();
@@ -115,11 +114,10 @@ const unifiedServer = function (req, res, server_url, server_port) {
 // Define the handles
 const handlers = {};
 
-// Sample Handler
+// Ping Handler
 
-handlers.sample = function (data, callback) {
-  // Callback a http status code, and a payload object
-  callback(406, { name: 'sample handler' });
+handlers.ping = (data, callback) => {
+  callback(200);
 };
 
 // Not Found Handler
@@ -130,5 +128,5 @@ handlers.notFound = function (data, callback) {
 
 // Define a request router
 const router = {
-  sample: handlers.sample,
+  ping: handlers.ping,
 };
